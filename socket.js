@@ -10,8 +10,8 @@ module.exports = (server, app, sessionMiddleware) => {
   const chat = io.of('/chat');
 
   io.use((socket, next) => {
-    cookieParser(process.env.COOKIE_SECRET)(socket.request, socket.request.res, next);
-    sessionMiddleware(socket.request, socket.request.res, next);
+    cookieParser(process.env.COOKIE_SECRET)(socket.request, socket.request.res || {}, next);
+    sessionMiddleware(socket.request, socket.request.res || {}, next);
   });
 
   room.on('connection', (socket) => {
@@ -44,11 +44,11 @@ module.exports = (server, app, sessionMiddleware) => {
         const connectSID = `${signedCookie}`;
         axios.delete(`http://localhost:8005/room/${roomId}`, {
           headers: {
-            Cookie: `connect.sid=s%3A${connectSID}`
+            Cookie: `connect.sid=s%3A${connectSID}` // connect.sid 쓰면 앞에 s%3A 붙혀야 된다.
           }
         })
           .then(() => {
-            console.log('방 제거 요청 성공');
+            console.log(`${roomId} 방 제거 요청 성공`);
           })
           .catch((error) => {
             console.error(error);
